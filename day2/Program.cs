@@ -26,6 +26,20 @@ In this example, if you were to follow the strategy guide, you would get a total
 What would your total score be if everything goes exactly according to your strategy guide?
 */
 
+/*
+--- Part Two ---
+The Elf finishes helping with the tent and sneaks back over to you. "Anyway, the second column says how the round needs to end: X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
+
+The total score is still calculated in the same way, but now you need to figure out what shape to choose so the round ends as indicated. The example above now goes like this:
+
+In the first round, your opponent will choose Rock (A), and you need the round to end in a draw (Y), so you also choose Rock. This gives you a score of 1 + 3 = 4.
+In the second round, your opponent will choose Paper (B), and you choose Rock so you lose (X) with a score of 1 + 0 = 1.
+In the third round, you will defeat your opponent's Scissors with Rock for a score of 1 + 6 = 7.
+Now that you're correctly decrypting the ultra top secret strategy guide, you would get a total score of 12.
+
+Following the Elf's instructions for the second column, what would your total score be if everything goes exactly according to your strategy guide?
+*/
+
 
 using System.Diagnostics;
 
@@ -36,21 +50,38 @@ class RockPaperScissors {
         SCISSORS
     }
 
+    private enum Result {
+        LOSE,
+        DRAW,
+        WIN
+    }
+
     private static Choice ParseChoice(string choice) {
         switch(choice) {
             case "A":
-            case "X":
                 return Choice.ROCK;
             case "B":
-            case "Y":
                 return Choice.PAPER;
             case "C":
-            case "Z":
                 return Choice.SCISSORS;
         }
 
         Debug.Assert(false, "Unexpected choice");
         return Choice.ROCK;
+    }
+
+    private static Result ParseResult(string result) {
+        switch(result) {
+            case "X":
+                return Result.LOSE;
+            case "Y":
+                return Result.DRAW;
+            case "Z":
+                return Result.WIN;
+        }
+
+        Debug.Assert(false, "Unexpected result");
+        return Result.LOSE;
     }
 
     //the score for the shape you selected (1 for Rock, 2 for Paper, and 3 for Scissors)
@@ -88,6 +119,26 @@ class RockPaperScissors {
         return 0;
     }
 
+    private static Choice GetMyChoice(Choice theirChoice, Result desiredResult) {
+        if(desiredResult == Result.DRAW)
+            return theirChoice;
+
+        switch(theirChoice) {
+            case Choice.ROCK:
+                if(desiredResult == Result.WIN) return Choice.PAPER;
+                return Choice.SCISSORS;
+            case Choice.PAPER:
+                if(desiredResult == Result.WIN) return Choice.SCISSORS;
+                return Choice.ROCK;
+            case Choice.SCISSORS:
+                if(desiredResult == Result.WIN) return Choice.ROCK;
+                return Choice.PAPER;
+        }
+
+        Debug.Assert(false, "Unexpected combo");
+        return 0;
+    }
+
     static void Main(string[] args)
     {
         using (StringReader reader = new StringReader(STRATEGY))
@@ -98,9 +149,11 @@ class RockPaperScissors {
             while(line != null)
             {
                 string[] letters = line.Split(' ');
-                Choice[] result = Array.ConvertAll(letters, new Converter<string, Choice>(ParseChoice));
+                Choice theirChoice = ParseChoice(letters[0]);
+                Result desiredResult = ParseResult(letters[1]);
+                Choice myChoice = GetMyChoice(theirChoice, desiredResult);
 
-                int score = GetMyScore(result[1]) + GetResultScore(result[1], result[0]);
+                int score = GetMyScore(myChoice) + GetResultScore(myChoice, theirChoice);
                 totalScore += score;
 
                 line = reader.ReadLine();
