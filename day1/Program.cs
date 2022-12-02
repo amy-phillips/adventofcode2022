@@ -2264,35 +2264,28 @@ string INPUT = """
 """;
 
 
-try
+using (StringReader reader = new StringReader(INPUT))
 {
-    using (StringReader reader = new StringReader(INPUT))
+    string? line = reader.ReadLine();
+    int elfCalories = 0;
+    List<int> totalElfCalories = new List<int>();
+    while(line != null)
     {
-        string? line = reader.ReadLine();
-        int elfCalories = 0;
-        List<int> totalElfCalories = new List<int>();
-        while(line != null)
-        {
-            if(line.Length == 0) {
-                // we've finished this elf
-                totalElfCalories.Add(elfCalories);
-                elfCalories = 0;
-            }
-            else {
-                elfCalories += Int32.Parse(line);
-            }
-            line = reader.ReadLine();
+        if(line.Length == 0) {
+            // we've finished this elf
+            totalElfCalories.Add(elfCalories);
+            elfCalories = 0;
         }
-
-        //totalElfCalories.Sort();
-        totalElfCalories = totalElfCalories.OrderByDescending(x => x).ToList();
-        
-        Console.WriteLine(totalElfCalories[0]);
-        Console.WriteLine(totalElfCalories[0]+totalElfCalories[1]+totalElfCalories[2]);
+        else {
+            elfCalories += Int32.Parse(line);
+        }
+        line = reader.ReadLine();
     }
+
+    //totalElfCalories.Sort();
+    totalElfCalories = totalElfCalories.OrderByDescending(x => x).ToList();
+    
+    Console.WriteLine(totalElfCalories[0]);
+    Console.WriteLine(totalElfCalories[0]+totalElfCalories[1]+totalElfCalories[2]);
 }
-catch (HttpRequestException e)
-{
-    Console.WriteLine("\nException Caught!");
-    Console.WriteLine("Message :{0} ", e.Message);
-}
+
