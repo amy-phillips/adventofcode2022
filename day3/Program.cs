@@ -48,16 +48,20 @@ class Rucksack {
         using (StringReader reader = new StringReader(STRATEGY))
         {
             int totalScore = 0;
-            string? line = reader.ReadLine();
+            string[] elves = new string[3];
+            for(int i=0; i<3; ++i) {
+                elves[i] = reader.ReadLine();
+            }
 
-            while(line != null) {
-                char[] first = line.Substring(0, (int)(line.Length / 2)).ToCharArray();
-                char[] last = line.Substring((int)(line.Length / 2), (int)(line.Length / 2)).ToCharArray();
+            while(elves[2] != null) {
 
-                char [] shared_item = first.Intersect(last).ToArray();
+                char [] first = elves[0].Intersect(elves[1]).ToArray();
+                char [] shared_item = first.Intersect(elves[2]).ToArray();
                 totalScore+=CharToScore(shared_item[0]);
 
-                line = reader.ReadLine();
+                for(int i=0; i<3; ++i) {
+                    elves[i] = reader.ReadLine();
+                }
             }
             
 
