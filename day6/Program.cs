@@ -28,6 +28,21 @@ nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg: first marker after character 10
 zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw: first marker after character 11
 How many characters need to be processed before the first start-of-packet marker is detected?*/
 
+/*--- Part Two ---
+Your device's communication system is correctly detecting packets, but still isn't working. It looks like it also needs to look for messages.
+
+A start-of-message marker is just like a start-of-packet marker, except it consists of 14 distinct characters rather than 4.
+
+Here are the first positions of start-of-message markers for all of the above examples:
+
+mjqjpqmgbljsphdztnvjfqwrcgsmlb: first marker after character 19
+bvwbjplbgvbhsrlpgdmjqwftvncz: first marker after character 23
+nppdvjthqldpwncqszvftbrmjlhg: first marker after character 23
+nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg: first marker after character 29
+zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw: first marker after character 26
+How many characters need to be processed before the first start-of-message marker is detected?
+*/
+
 using System.Diagnostics;
 using System;
 using System.Text.RegularExpressions;
@@ -37,14 +52,15 @@ class Camp {
     public static void Main(string[] args) {
         using (StringReader reader = new StringReader(DATASTREAM))
         {
+            const int seriesLength = 14;
             int numCharactersRead = 0;
-            char[] block = new char[4];
+            char[] block = new char[seriesLength];
             // todo - deal with hitting the end of the string lol
             while(true) {
-                int offset = numCharactersRead++ % 4; // wrap back round if we have hit the end of the array
+                int offset = numCharactersRead++ % seriesLength; // wrap back round if we have hit the end of the array
                 block[offset] = (char)reader.Read();
                 var distinct = block.Distinct().ToList(); 
-                if(numCharactersRead > 4 && distinct.Count == 4) {
+                if(numCharactersRead > 4 && distinct.Count == seriesLength) {
                     Console.WriteLine(numCharactersRead);
                     break;
                 }
