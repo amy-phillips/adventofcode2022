@@ -67,8 +67,7 @@ class Camp {
         return Enumerable.Range(start, end-start+1).ToArray();
     }
     public static void Main(string[] args) {
-        using (StringReader reader = new StringReader(STRATEGY
-    ))
+        using (StringReader reader = new StringReader(STRATEGY))
         {
             int totalScore = 0;        
             string? line = reader.ReadLine();
