@@ -93,11 +93,7 @@ Directories e and a are both too small; deleting them would not free up enough s
 Find the smallest directory that, if deleted, would free up enough space on the filesystem to run the update. What is the total size of that directory?
 */
 
-using System.Diagnostics;
-using System;
 using System.Text.RegularExpressions;
-using System.Linq; 
-using System.Collections;
 
 class Directory {
     public string name;
@@ -110,10 +106,30 @@ class Directory {
     }
 }
 
-class Camp {
+class FileSystemOoojamaflip {
 
-    
+    private const int TOTAL_DISK = 70000000;
+    private const int REQUIRED_DISK = 30000000;
+
     private static Stack<Directory> directoryStack = new Stack<Directory>();
+    private static List<Directory> directoryList = new List<Directory>();
+    private static int totalBigFolders = 0;        
+    private static void leaveDirectory() {
+        Directory dir = directoryStack.Pop();
+        directoryList.Add(dir); // stash this for later
+        Console.WriteLine("Left "+dir.name);
+        if(dir.size <= 100000) {
+            Console.WriteLine("Small directory "+dir.name+" of size "+dir.size);
+            totalBigFolders += dir.size;
+        } else {
+            Console.WriteLine("Large directory "+dir.name+" of size "+dir.size);
+        }
+        //update parent with my size
+        if(directoryStack.Count > 0) {
+            directoryStack.Peek().size += dir.size;
+            Console.WriteLine("Parent directory "+directoryStack.Peek().name+" of size "+directoryStack.Peek().size);
+        }
+    }
 
     public static void Main(string[] args) {
         Regex cd_rx = new Regex(@"\$ cd ([\w\.\/]+)",
@@ -124,7 +140,7 @@ class Camp {
 
         using (StringReader reader = new StringReader(STRATEGY))
         {
-            int totalBigFolders = 0;        
+            
             string? line = reader.ReadLine();
             while(line != null) {
                 // are we going in/out a level?
@@ -133,17 +149,7 @@ class Camp {
                     Match match = matches[0];
                     // are we going out a level?  if so, update the size of this directory
                     if(match.Groups[1].Value == "..") {
-                        Directory dir = directoryStack.Pop();
-                        Console.WriteLine("Left "+dir.name);
-                        if(dir.size <= 100000) {
-                            Console.WriteLine("Small directory "+dir.name+" of size "+dir.size);
-                            totalBigFolders += dir.size;
-                        } else {
-                            Console.WriteLine("Large directory "+dir.name+" of size "+dir.size);
-                        }
-                        //update parent with my size
-                        directoryStack.Peek().size += dir.size;
-                        Console.WriteLine("Parent directory "+directoryStack.Peek().name+" of size "+directoryStack.Peek().size);
+                        leaveDirectory();
                     } else {
                         Console.WriteLine("Entered "+match.Groups[1].Value);
                         directoryStack.Push(new Directory(match.Groups[1].Value));
@@ -168,11 +174,62 @@ class Camp {
                 line = reader.ReadLine();
             }
 
+            // anything left on the directory stack, update, pop etc
+            while (directoryStack.Count > 0)
+            {
+                leaveDirectory();
+            }
+
             Console.WriteLine(totalBigFolders);
+
+            // how much space do we need to clear by deleting a single directory?
+            int diskToClear = REQUIRED_DISK - (TOTAL_DISK - directoryList.Last().size);
+            Directory toDelete = new Directory("dummy");
+            toDelete.size = Int32.MaxValue;
+            foreach(Directory dir in directoryList) {
+                // will this directory clear enough space?
+                if(dir.size < diskToClear) {
+                    continue;
+                }  
+                // is this directory bigger than the previous best option?
+                if(toDelete.size < dir.size) {
+                    continue;
+                }
+
+                toDelete = dir;
+            }
+
+            Console.WriteLine(toDelete.size);
         }
 
         
     }
+
+    private static string TEST_STRATEGY = """
+$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k
+""";
 
     private static string STRATEGY = """
 $ cd /
