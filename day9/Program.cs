@@ -6,51 +6,113 @@ using System.Numerics;
 
 class ForestOfCheeeeesiness {
 
-    static Vector2  headPosition = new Vector2 (0,0);
-    static Vector2  tailPosition = new Vector2 (0,0);
+    static T[] InitializeArray<T>(int length) where T : new()
+    {
+        T[] array = new T[length];
+        for (int i = 0; i < length; ++i)
+        {
+            array[i] = new T();
+        }
+
+        return array;
+    }
+
+    static Vector2[] nodePositions = InitializeArray<Vector2>(10);
 
     static HashSet<Vector2 > visited = new HashSet<Vector2 >();
+
+    private static Vector2 minCorner = new Vector2(0,0);
+    private static Vector2 maxCorner = new Vector2(7,7);
+
+    private static void printState() {
+
+        for(int y=(int)maxCorner.Y-1; y>(int)minCorner.Y-1; --y) {
+            string line="";
+            for(int x=(int)minCorner.X; x<(int)maxCorner.X; ++x) {
+                // is there a node here?
+                Vector2 thisPos = new Vector2(x,y);
+                bool foundNode=false;
+                for(int node=0; node<nodePositions.Count(); ++node) {
+                    if(thisPos == nodePositions[node]) {
+                        line += node.ToString();
+                        foundNode=true;
+                        break;
+                    }
+                }
+                if(!foundNode) {
+                    line += ".";
+                }
+            }
+            Console.WriteLine(line);
+        }
+    }
 
     private static void doMove(char direction, int count) {
         for(int i=0; i<count; ++i) {
             // first move the head
+            int node=0;
             switch(direction) {
                 case 'U':
-                    headPosition.Y++;
+                    nodePositions[node].Y++;
                     break;
                 case 'D':
-                    headPosition.Y--;
+                    nodePositions[node].Y--;
                     break; 
                 case 'L':
-                    headPosition.X--;
+                    nodePositions[node].X--;
                     break; 
                 case 'R':
-                    headPosition.X++;
+                    nodePositions[node].X++;
                     break; 
             }
 
-            // then tail catches up
-            Vector2 diff = Vector2.Subtract(headPosition,tailPosition);
-            if(diff.X<-1) {
-                tailPosition.X--;
-                tailPosition.Y=headPosition.Y;
-            }
-            if(diff.X>1) {
-                tailPosition.X++;
-                tailPosition.Y=headPosition.Y;
-            }
-            if(diff.Y<-1) {
-                tailPosition.Y--;
-                tailPosition.X=headPosition.X;
-            }
-            if(diff.Y>1) {
-                tailPosition.Y++;
-                tailPosition.X=headPosition.X;
+            for(; node+1<nodePositions.Count(); ++node) {
+                // then tail catches up
+                Vector2 diff = Vector2.Subtract(nodePositions[node],nodePositions[node+1]);
+                if(diff.X<-1) {
+                    nodePositions[node+1].X--;
+                    if(diff.Y<0) {
+                        nodePositions[node+1].Y--;
+                    }
+                    else if(diff.Y>0) {
+                        nodePositions[node+1].Y++;
+                    }
+                    continue;
+                }
+                if(diff.X>1) {
+                    nodePositions[node+1].X++;
+                    if(diff.Y<0) {
+                        nodePositions[node+1].Y--;
+                    }
+                    else if(diff.Y>0) {
+                        nodePositions[node+1].Y++;
+                    }
+                    continue;
+                }
+                if(diff.Y<-1) {
+                    nodePositions[node+1].Y--;
+                    if(diff.X<0) {
+                        nodePositions[node+1].X--;
+                    }
+                    else if(diff.X>0) {
+                        nodePositions[node+1].X++;
+                    }
+                    continue;
+                }
+                if(diff.Y>1) {
+                    nodePositions[node+1].Y++;
+                    if(diff.X<0) {
+                        nodePositions[node+1].X--;
+                    }
+                    else if(diff.X>0) {
+                        nodePositions[node+1].X++;
+                    }
+                    continue;
+                }
             }
 
-            visited.Add(tailPosition);
+            visited.Add(nodePositions.Last());
         }
-        
     }
 
     public static void Main(string[] args) {
@@ -72,6 +134,7 @@ class ForestOfCheeeeesiness {
                     int count = Int32.Parse(match.Groups[2].Value);
                     
                     doMove(direction, count);
+                    printState();
 
                     line = reader.ReadLine();
                     continue;
@@ -90,7 +153,18 @@ class ForestOfCheeeeesiness {
         
     }
 
-    private static string TEST_STRATEGY = """
+    private static string TEST_STRATEGY2 = """
+R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
+""";
+
+private static string TEST_STRATEGY = """
 R 4
 U 4
 L 3
