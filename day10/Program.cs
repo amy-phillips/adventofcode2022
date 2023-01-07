@@ -6,18 +6,30 @@ using System.Numerics;
 
 class ForestOfCheeeeesiness {
     private static int cycle = 0;
-    private static int current = 1;
-    private static int total = 0;
-
-    private static HashSet<int> wantedCycles = new HashSet<int> {20,60,100,140,180,220};
+    private static int sprite = 1;
+    private static string crtRow = "";
 
     private static void incrementCycle(int increment) {
         while(increment-- > 0) {
-            cycle++;
-            if(wantedCycles.Contains(cycle)) {
-                Console.WriteLine(cycle*current);
-                total+=current*cycle;
+            
+            
+            // does sprite overlap us?
+            int diff = sprite-cycle;
+            if(diff<=1 && diff >=-1) {
+                crtRow+="#";
+            } else {
+                crtRow+=".";
             }
+
+            if(cycle==39) {
+                Console.WriteLine(crtRow);
+                crtRow = "";
+                cycle=0;
+            } else {
+                cycle++;
+            }
+
+            
         }
     }
     public static void Main(string[] args) {
@@ -40,14 +52,14 @@ class ForestOfCheeeeesiness {
                         
                         int x = Int32.Parse(match.Groups[1].Value);
                         incrementCycle(2);
-                        current += x;
+                        sprite += x;
                     }
                 }
                 
                 line = reader.ReadLine();
             }
 
-            Console.WriteLine(total);
+            
         }
     }
 
